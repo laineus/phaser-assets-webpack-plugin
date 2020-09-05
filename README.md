@@ -1,7 +1,7 @@
 
 A Webpack plugin to load assets automatically for Phaser3
 
-# Getting started
+# Usage
 
 Install:
 
@@ -9,7 +9,7 @@ Install:
 $ npm install phaser-assets-webpack-plugin
 ```
 
-`webpack.config.js`:
+Define it into `webpack.config.js`:
 
 ```js
 const AssetPlugin = require('phaser-assets-webpack-plugin')
@@ -32,13 +32,13 @@ const AssetPlugin = require('phaser-assets-webpack-plugin')
 
 Patterns:
 
-|Key|What is|
-|---|---|
-|type|Method name for Phaser::Loader. `image` will be `spritesheet` automatically when it is.|
-|prefix|Prefix for asset key name.|
-|dir|Assets directory from document root. Must be started with `/`.|
-|rule|Name pattern of files to be assets.|
-|callback|Callback function after loaded. Given arg that Array of the loaded data.|
+|Key|Require|What is|
+|---|---|---|
+|type|Yes|Method name for Phaser::Loader. `image` will be `spritesheet` automatically when it is.|
+|prefix|No|Prefix for asset key name.|
+|dir|Yes|Assets directory from document root. Must be started with `/`.|
+|rule|Yes|Name pattern of files to be assets.|
+|callback|No|Callback function after loaded. Given arg that Array of the loaded data.|
 
 Options:
 
@@ -47,11 +47,11 @@ Options:
 |documentRoot|`'/public'`|Document root. Must be started with `/`|
 |importName|`'assets'`|`import assets from '[importName]'`|
 |spriteSheetSettingsFileName|`'settings.json'`|Name of settings file for spritesheet.|
-|useAbsoluteUrl|true|URL setting for your app. `true`: `'/image.png'` `false`: `'./image.png'`|
+|useAbsoluteUrl|true|URL setting for your app. Such as '/image.png' or './image.png'`|
 
 # Use it in Phaser3
 
-Make an Object like following when exists files under rules you defined.
+An Object like following is going to be generated when exists files under rules you defined.
 
 ```js
 {
@@ -67,7 +67,7 @@ Make an Object like following when exists files under rules you defined.
 }
 ```
 
-It can be imported and used for Assets loading as is.
+It can be imported and used for Phaser::Loader as is.
 
 ```js
 import assets from 'assets'
@@ -81,7 +81,7 @@ Object.keys(assets).forEach(methodName => {
 
 # Spritesheet setting
 
-Just define num of horizontal and vertical for each spritesheet.
+Just define num of horizontal and vertical for each spritesheet into JSON file located same dir as assets.
 
 ```
 - img/
@@ -95,4 +95,4 @@ Just define num of horizontal and vertical for each spritesheet.
 ]
 ```
 
-The `image` will be `spritesheet` if  the setting is exsists.
+The `image` will be `spritesheet` if the setting is exsists.
