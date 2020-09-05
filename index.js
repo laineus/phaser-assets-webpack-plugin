@@ -1,14 +1,15 @@
 const fs = require('fs')
 const sizeOf = require('image-size')
-const path = require('path')
 
 const defaultSettings = {
   documentRoot: '/public',
   importName: 'assets',
   spriteSheetSettingsFileName: 'settings.json',
-  jsonOutputPath: './.assets.json',
   useAbsoluteUrl: true
 }
+
+// This file need to be updated when dependent files changed to make Webpack do re-compile.
+const tmpWatchedJson = `${__dirname}/tmp/assets.json`
 
 module.exports = class {
   constructor (patterns, settings) {
@@ -24,8 +25,8 @@ module.exports = class {
     compiler.options.externals[this.settings.importName] = this.updateAssetsModule()
   }
   afterCompile (compilation) {
-    // Make Webpack Watch the JSON file
-    compilation.fileDependencies.add(path.resolve(this.settings.jsonOutputPath))
+    // Make Webpack Watch the tmporary JSON file
+    compilation.fileDependencies.add(tmpWatchedJson)
     // Watch depended directories
     this.patterns.map(v => `.${this.settings.documentRoot}${v.dir}`).forEach(dir => {
       fs.watch(dir, event => {
@@ -44,12 +45,9 @@ module.exports = class {
   updateAssetsModule () {
     console.log('AssetsPlugin: Loading...')
     const data = this.getAssetsData()
-    this.saveJsonFile(data)
+    fs.writeFileSync(tmpWatchedJson, JSON.stringify(data, null, '  '))
     console.log('AssetsPlugin: Complete!')
     return JSON.stringify(data)
-  }
-  saveJsonFile (data) {
-    fs.writeFileSync(this.settings.jsonOutputPath, JSON.stringify(data, null, '  '))
   }
   getAssetsData () {
     const data = this.patterns.reduce((result, pattern) => {
