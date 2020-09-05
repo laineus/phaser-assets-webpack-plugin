@@ -6,7 +6,7 @@
   "repository": "https://github.com/laineus/phaser-assets-webpack-plugin",
   "author": "Laineus",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "image-size": "^0.9.1"
   }
 }
