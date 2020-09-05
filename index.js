@@ -16,18 +16,15 @@ module.exports = class {
     this.patterns = patterns
     this.settings = { ...defaultSettings, ...settings }
     this.updateFlg = false
+    this.assetsModule = null
   }
   apply (compiler) {
     compiler.hooks.afterEnvironment.tap('AssetsPlugin', this.afterEnvironment.bind(this, compiler))
     compiler.hooks.afterCompile.tap('AssetsPlugin', this.afterCompile.bind(this))
   }
   afterEnvironment (compiler) {
-    compiler.options.externals[this.settings.importName] = this.updateAssetsModule()
-  }
-  afterCompile (compilation) {
-    // Make Webpack Watch the tmporary JSON file
-    compilation.fileDependencies.add(tmpWatchedJson)
-    // Watch depended directories
+    compiler.options.externals[this.settings.importName] = JSON.stringify(this.updateAssetsModule())
+    // Watch dependent directories
     this.patterns.map(v => `.${this.settings.documentRoot}${v.dir}`).forEach(dir => {
       fs.watch(dir, event => {
         this.updateFlg = this.updateFlg || event === 'rename'
@@ -35,19 +32,23 @@ module.exports = class {
     })
     // Do polling with a flag because [fs.watch] detects event twice for one update
     setInterval(() => {
-      if (this.updateFlg) {
-        const assetsModule = compilation.modules.find(v => v.userRequest === this.settings.importName)
-        if (assetsModule) assetsModule.request = this.updateAssetsModule()
+      if (this.updateFlg && this.assetsModule) {
+        this.assetsModule.request = this.updateAssetsModule()
         this.updateFlg = false
       }
     }, 1000)
+  }
+  afterCompile (compilation) {
+    this.assetsModule = compilation.modules.find(v => v.userRequest === this.settings.importName)
+    // Make Webpack Watch the tmporary JSON file
+    compilation.fileDependencies.add(tmpWatchedJson)
   }
   updateAssetsModule () {
     console.log('AssetsPlugin: Loading...')
     const data = this.getAssetsData()
     fs.writeFileSync(tmpWatchedJson, JSON.stringify(data, null, '  '))
     console.log('AssetsPlugin: Complete!')
-    return JSON.stringify(data)
+    return data
   }
   getAssetsData () {
     const data = this.patterns.reduce((result, pattern) => {
