@@ -33,7 +33,7 @@ module.exports = class {
     // Do polling with a flag because [fs.watch] detects event twice for one update
     setInterval(() => {
       if (this.updateFlg && this.assetsModule) {
-        this.assetsModule.request = this.updateAssetsModule()
+        this.assetsModule.request = JSON.stringify(this.updateAssetsModule())
         this.updateFlg = false
       }
     }, 1000)
