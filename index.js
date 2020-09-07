@@ -9,21 +9,27 @@ const defaultSettings = {
 }
 
 // This file need to be updated when dependent files changed to make Webpack do re-compile.
-const tmpWatchedJson = `${__dirname}/tmp/assets.json`
+const tmpTimestampFile = `${__dirname}/tmp/timestamp`
 
 module.exports = class {
   constructor (patterns, settings) {
     this.patterns = patterns
     this.settings = { ...defaultSettings, ...settings }
     this.updateFlg = false
-    this.assetsModule = null
+    this.latestData = null
+    this.originalIdentifier = null
   }
   apply (compiler) {
     compiler.hooks.afterEnvironment.tap('AssetsPlugin', this.afterEnvironment.bind(this, compiler))
+    compiler.hooks.compilation.tap('AssetsPlugin', this.compilation.bind(this))
     compiler.hooks.afterCompile.tap('AssetsPlugin', this.afterCompile.bind(this))
   }
   afterEnvironment (compiler) {
-    compiler.options.externals[this.settings.importName] = JSON.stringify(this.updateAssetsModule())
+    console.log('AssetsPlugin: Initialize')
+    this.latestData = this.getAssetsData()
+    this.originalIdentifier = `external ${JSON.stringify(this.latestDataJson)}`
+    // Make Webpack option
+    compiler.options.externals[this.settings.importName] = this.latestDataJson
     // Watch dependent directories
     this.patterns.map(v => `.${this.settings.documentRoot}${v.dir}`).forEach(dir => {
       fs.watch(dir, event => {
@@ -32,23 +38,28 @@ module.exports = class {
     })
     // Do polling with a flag because [fs.watch] detects event twice for one update
     setInterval(() => {
-      if (this.updateFlg && this.assetsModule) {
-        this.assetsModule.request = JSON.stringify(this.updateAssetsModule())
-        this.updateFlg = false
-      }
+      if (!this.updateFlg) return
+      console.log('AssetsPlugin: Reload')
+      this.latestData = this.getAssetsData()
+      fs.writeFileSync(tmpTimestampFile, String(Math.floor(new Date() / 1000)))
+      this.updateFlg = false
     }, 1000)
   }
-  afterCompile (compilation) {
-    this.assetsModule = compilation.modules.find(v => v.userRequest === this.settings.importName)
-    // Make Webpack Watch the tmporary JSON file
-    compilation.fileDependencies.add(tmpWatchedJson)
+  compilation (compilation) {
+    if (!compilation.cache) return
+    const cachedModule = compilation.cache[`m${this.originalIdentifier}`]
+    if (!cachedModule) return
+    // Replace value
+    cachedModule.request = this.latestDataJson
+    // Original key should be existing to avoid modules become duplicate
+    compilation._modules.set(this.originalIdentifier, cachedModule)
   }
-  updateAssetsModule () {
-    console.log('AssetsPlugin: Loading...')
-    const data = this.getAssetsData()
-    fs.writeFileSync(tmpWatchedJson, JSON.stringify(data, null, '  '))
-    console.log('AssetsPlugin: Complete!')
-    return data
+  afterCompile (compilation) {
+    // Make Webpack watchs the tmporary timestamp file
+    compilation.fileDependencies.add(tmpTimestampFile)
+  }
+  get latestDataJson () {
+    return JSON.stringify(this.latestData)
   }
   getAssetsData () {
     const data = this.patterns.reduce((result, pattern) => {
