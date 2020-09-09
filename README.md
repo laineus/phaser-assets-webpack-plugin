@@ -103,7 +103,7 @@ The `image` will be `spritesheet` if the setting is exsists.
 
 # Requirements
 
-- Webpack4 or More
+- Webpack4 or higher
 
 I'm not sure if this will be working on Webpack3 or less.
 Please make an issue or PR if need it.
