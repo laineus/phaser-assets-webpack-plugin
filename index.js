@@ -51,6 +51,7 @@ module.exports = class {
     if (!cachedModule) return
     // Replace value
     cachedModule.request = this.latestDataJson
+    if (cachedModule.identifier() === this.originalIdentifier) return
     // Original key should be existing to avoid modules become duplicate
     compilation._modules.set(this.originalIdentifier, cachedModule)
   }
