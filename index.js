@@ -111,7 +111,6 @@ module.exports = class {
     const { width, height } = sizeOf(filePath)
     const frameWidth = Math.round(width / numOfX)
     const frameHeight = Math.round(height / numOfY)
-    const endFrame = numOfX * numOfY
-    return { frameWidth, frameHeight, endFrame }
+    return { frameWidth, frameHeight }
   }
 }
