@@ -1,3 +1,4 @@
+const path = require('path')
 const fs = require('fs')
 const sizeOf = require('image-size')
 
@@ -9,7 +10,7 @@ const defaultSettings = {
 }
 
 // This file need to be updated when dependent files changed to make Webpack do re-compile.
-const tmpTimestampFile = `${__dirname}/tmp/timestamp`
+const tmpTimestampFile = path.resolve(__dirname, 'tmp/timestamp')
 
 module.exports = class {
   constructor (patterns, settings) {
@@ -20,6 +21,7 @@ module.exports = class {
     this.originalIdentifier = null
   }
   apply (compiler) {
+    this.projectRoot = compiler.context
     compiler.hooks.afterEnvironment.tap('AssetsPlugin', this.afterEnvironment.bind(this, compiler))
     compiler.hooks.compilation.tap('AssetsPlugin', this.compilation.bind(this))
     compiler.hooks.afterCompile.tap('AssetsPlugin', this.afterCompile.bind(this))
@@ -34,7 +36,7 @@ module.exports = class {
   }
   watch () {
     // Watch dependent directories
-    this.patterns.map(v => `.${this.settings.documentRoot}${v.dir}`).forEach(dir => {
+    this.patterns.map(v => path.join(this.projectRoot, this.settings.documentRoot, v.dir)).forEach(dir => {
       fs.watch(dir, event => {
         this.updateFlg = this.updateFlg || event === 'rename'
       })
@@ -67,7 +69,7 @@ module.exports = class {
   }
   getAssetsData () {
     const data = this.patterns.reduce((result, pattern) => {
-      const dir = `.${this.settings.documentRoot}/${pattern.dir}`
+      const dir = path.join(this.projectRoot, this.settings.documentRoot, pattern.dir)
       const fileNames = fs.readdirSync(dir)
       const spriteSheetSettings = this.getSpriteSheetSettings(dir)
       const list = fileNames.filter(fileName => pattern.rule.test(fileName)).reduce((list, fileName) => {
@@ -79,7 +81,7 @@ module.exports = class {
           sameKeyRow.splice(1, 1, [sameKeyRow[1], url].flat())
         } else {
           const spriteSheetSetting = spriteSheetSettings && spriteSheetSettings.find(v => v[0] === fileName)
-          const spriteSheetOption = spriteSheetSetting && this.getSpriteSheetOption(`${dir}/${fileName}`, spriteSheetSetting[1], spriteSheetSetting[2])
+          const spriteSheetOption = spriteSheetSetting && this.getSpriteSheetOption(path.join(dir, fileName), spriteSheetSetting[1], spriteSheetSetting[2])
           list.push(spriteSheetOption ? [assetKeyName, url, spriteSheetOption] : [assetKeyName, url])
         }
         return list
@@ -93,7 +95,7 @@ module.exports = class {
     return data
   }
   getSpriteSheetSettings (dir) {
-    const pathToSettings = `${dir}/${this.settings.spriteSheetSettingsFileName}`
+    const pathToSettings = path.join(dir, this.settings.spriteSheetSettingsFileName)
     if (!fs.existsSync(pathToSettings)) return null
     const settingsJson = fs.readFileSync(pathToSettings, 'utf8')
     try {
