@@ -27,7 +27,7 @@ module.exports = class {
     compiler.hooks.afterCompile.tap('AssetsPlugin', this.afterCompile.bind(this))
   }
   afterEnvironment (compiler) {
-    console.log('AssetsPlugin: Initialize')
+    console.log('PhaserAssetsWebpackPlugin: Initializing...')
     this.latestData = this.getAssetsData()
     this.originalIdentifier = `external ${JSON.stringify(this.latestDataJson)}`
     // Make Webpack option
@@ -44,7 +44,7 @@ module.exports = class {
     // Do polling with a flag because [fs.watch] detects event twice for one update
     setInterval(() => {
       if (!this.updateFlg) return
-      console.log('AssetsPlugin: Reload')
+      console.log('PhaserAssetsWebpackPlugin: Reloading...')
       this.latestData = this.getAssetsData()
       fs.writeFileSync(tmpTimestampFile, String(Math.floor(new Date() / 1000)))
       this.updateFlg = false
