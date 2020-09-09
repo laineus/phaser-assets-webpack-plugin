@@ -9,10 +9,10 @@ Install:
 $ npm install phaser-assets-webpack-plugin
 ```
 
-Define it into `webpack.config.js`:
+Define into `webpack.config.js`:
 
 ```js
-const AssetPlugin = require('phaser-assets-webpack-plugin')
+const PhaserAssetsWebpackPlugin = require('phaser-assets-webpack-plugin')
 // ...
 {
   entry: {
@@ -22,7 +22,7 @@ const AssetPlugin = require('phaser-assets-webpack-plugin')
     ...
   },
   plugins: [
-    new AssetPlugin([
+    new PhaserAssetsWebpackPlugin([
       { type: 'image', dir: '/img', rule: /^\w+\.png$/ },
       { type: 'audio', dir: '/audio', rule: /^\w+\.(m4a|ogg)$/ }
     ], { documentRoot: '/public' })
@@ -49,9 +49,9 @@ Options:
 |spriteSheetSettingsFileName|`'settings.json'`|Name of settings file for spritesheet.|
 |useAbsoluteUrl|true|URL setting for your app. Such as '/image.png' or './image.png'`|
 
-# Use it in Phaser3
+## Use it in Phaser3
 
-An Object like following is going to be generated when exists files under rules you defined.
+An Object like following will be generated when exists files under the rules you defined.
 
 ```js
 {
@@ -67,7 +67,9 @@ An Object like following is going to be generated when exists files under rules 
 }
 ```
 
-It can be imported and used for Phaser::Loader as is.
+The key names based on each file name. ( `player.png` => `[prefix]player` )
+
+The Data can be imported and used for Phaser::Loader as is.
 
 ```js
 import assets from 'assets'
@@ -79,7 +81,9 @@ Object.keys(assets).forEach(methodName => {
 })
 ```
 
-# Spritesheet setting
+Then it will be reloaded automatically when added or removed files while webpack is watching.
+
+## Spritesheet setting
 
 Just define num of horizontal and vertical for each spritesheet into JSON file located same dir as assets.
 
@@ -96,3 +100,10 @@ Just define num of horizontal and vertical for each spritesheet into JSON file l
 ```
 
 The `image` will be `spritesheet` if the setting is exsists.
+
+# Requirements
+
+- Webpack4 or More
+
+I'm not sure if this will be working on Webpack3 or less.
+Please make an issue or PR if need it.
