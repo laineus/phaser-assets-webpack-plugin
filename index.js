@@ -92,6 +92,8 @@ module.exports = class {
     }, {})
     data.spritesheet = data.image.filter(v => v.length === 3)
     data.image = data.image.filter(v => v.length === 2)
+    if (!data.spritesheet.length) delete data.spritesheet
+    if (!data.image.length) delete data.image
     return data
   }
   getSpriteSheetSettings (dir) {
