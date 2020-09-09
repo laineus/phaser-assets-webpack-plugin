@@ -59,7 +59,7 @@ An Object like following will be generated when exists files under the rules you
     ['title', '/img/title.png']
   ],
   spritesheet: [
-    ['player', '/img/player.png'. { frameWidth: 16, frameHeight: 16 }]
+    ['player', '/img/player.png'. { frameWidth: 16, frameHeight: 16, endFrame: 3 }]
   ],
   audio: [
     ['bgm', ['/audio/bgm.m4a', '/audio/bgm.ogg']]
