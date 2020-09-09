@@ -30,6 +30,9 @@ module.exports = class {
     this.originalIdentifier = `external ${JSON.stringify(this.latestDataJson)}`
     // Make Webpack option
     compiler.options.externals[this.settings.importName] = this.latestDataJson
+    if (compiler.options.mode === 'development') this.watch()
+  }
+  watch () {
     // Watch dependent directories
     this.patterns.map(v => `.${this.settings.documentRoot}${v.dir}`).forEach(dir => {
       fs.watch(dir, event => {
