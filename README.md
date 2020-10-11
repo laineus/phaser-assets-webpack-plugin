@@ -1,3 +1,8 @@
+# PhaserAssetsWebpackPlugin
+
+[![Phaser 3.x](https://img.shields.io/badge/Phaser-3.x-brightgreen.svg)](https://github.com/photonstorm/phaser)
+[![npm](https://img.shields.io/npm/v/phaser-assets-webpack-plugin.svg)](https://www.npmjs.com/package/phaser-assets-webpack-plugin)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/laineus/phaser-assets-webpack-plugin/blob/master/LICENSE)
 
 A Webpack plugin to load assets automatically for Phaser3
 

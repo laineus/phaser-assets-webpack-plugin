@@ -31,6 +31,7 @@ module.exports = class {
     this.latestData = this.getAssetsData()
     this.originalIdentifier = `external ${JSON.stringify(this.latestDataJson)}`
     // Make Webpack option
+    if (!compiler.options.externals) compiler.options.externals = {}
     compiler.options.externals[this.settings.importName] = this.latestDataJson
     if (compiler.options.mode === 'development') this.watch()
   }
