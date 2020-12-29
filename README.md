@@ -112,3 +112,9 @@ The `image` will be `spritesheet` if the setting is exsists.
 
 I'm not sure if this will be working on Webpack3 or less.
 Please make an issue or PR if need it.
+
+# [Examples] Projects that using this plugin
+
+- [phavuer-example](https://github.com/laineus/phavuer-example)
+- [phavuer-rpg-example](https://github.com/laineus/phavuer-rpg-example)
+- [unsung-kingdom](https://github.com/laineus/unsung-kingdom)
