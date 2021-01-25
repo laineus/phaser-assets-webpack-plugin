@@ -3,70 +3,42 @@ const fs = require('fs')
 const sizeOf = require('image-size')
 
 const defaultSettings = {
-  documentRoot: '/public',
-  importName: 'assets',
-  spriteSheetSettingsFileName: 'settings.json',
-  useAbsoluteUrl: true
+  documentRoot: 'public',
+  output: 'assets.json',
+  spriteSheetSettingsFileName: 'settings.json'
 }
-
-// This file need to be updated when dependent files changed to make Webpack do re-compile.
-const tmpTimestampFile = path.resolve(__dirname, 'tmp/timestamp')
 
 module.exports = class {
   constructor (patterns, settings) {
     this.patterns = patterns
     this.settings = { ...defaultSettings, ...settings }
-    this.updateFlg = false
-    this.latestData = null
-    this.originalIdentifier = null
+    this.timer = null
   }
   apply (compiler) {
     this.projectRoot = compiler.context
-    compiler.hooks.afterEnvironment.tap('AssetsPlugin', this.afterEnvironment.bind(this, compiler))
-    compiler.hooks.compilation.tap('AssetsPlugin', this.compilation.bind(this))
-    compiler.hooks.afterCompile.tap('AssetsPlugin', this.afterCompile.bind(this))
-  }
-  afterEnvironment (compiler) {
-    console.log('PhaserAssetsWebpackPlugin: Initializing...')
-    this.latestData = this.getAssetsData()
-    this.originalIdentifier = `external ${JSON.stringify(this.latestDataJson)}`
-    // Make Webpack option
-    if (!compiler.options.externals) compiler.options.externals = {}
-    compiler.options.externals[this.settings.importName] = this.latestDataJson
-    if (compiler.options.mode === 'development') this.watch()
+    compiler.hooks.afterEnvironment.tap('AssetsPlugin', () => {
+      console.log('PhaserAssetsWebpackPlugin: Initializing...')
+      this.exportJson()
+      if (compiler.options.mode === 'development') this.watch()
+    })
   }
   watch () {
     // Watch dependent directories
     this.patterns.map(v => path.join(this.projectRoot, this.settings.documentRoot, v.dir)).forEach(dir => {
-      fs.watch(dir, event => {
-        this.updateFlg = this.updateFlg || event === 'rename'
+      fs.watch(dir, _event => {
+        clearTimeout(this.timer)
+        this.timer = setTimeout(() => {
+          console.log('PhaserAssetsWebpackPlugin: Reloading...')
+          this.exportJson()
+        }, 2000)
       })
     })
-    // Do polling with a flag because [fs.watch] detects event twice for one update
-    setInterval(() => {
-      if (!this.updateFlg) return
-      console.log('PhaserAssetsWebpackPlugin: Reloading...')
-      this.latestData = this.getAssetsData()
-      fs.writeFileSync(tmpTimestampFile, String(Math.floor(new Date() / 1000)))
-      this.updateFlg = false
-    }, 1000)
   }
-  compilation (compilation) {
-    if (!compilation.cache) return
-    const cachedModule = compilation.cache[`m${this.originalIdentifier}`]
-    if (!cachedModule) return
-    // Replace value
-    cachedModule.request = this.latestDataJson
-    if (cachedModule.identifier() === this.originalIdentifier) return
-    // Original key should be existing to avoid modules become duplicate
-    compilation._modules.set(this.originalIdentifier, cachedModule)
-  }
-  afterCompile (compilation) {
-    // Make Webpack watchs the tmporary timestamp file
-    compilation.fileDependencies.add(tmpTimestampFile)
-  }
-  get latestDataJson () {
-    return JSON.stringify(this.latestData)
+  exportJson () {
+    const assetsData = this.getAssetsData()
+    const json = JSON.stringify(assetsData, null, 2)
+    const outputPath = path.join(this.projectRoot, this.settings.output)
+    fs.writeFileSync(outputPath, json)
   }
   getAssetsData () {
     const data = this.patterns.reduce((result, pattern) => {
@@ -75,7 +47,7 @@ module.exports = class {
       const spriteSheetSettings = this.getSpriteSheetSettings(dir)
       const list = fileNames.filter(fileName => pattern.rule.test(fileName)).reduce((list, fileName) => {
         const assetKeyName = `${pattern.prefix}${fileName.split('.')[0]}`
-        const url = `${this.settings.useAbsoluteUrl ? '' : '.'}${pattern.dir}/${fileName}`
+        const url = `${pattern.dir}${pattern.dir.endsWith('/') ? '' : '/'}${fileName}`
         const sameKeyRow = list.find(v => v[0] === assetKeyName)
         if (sameKeyRow) {
           // Append the file if existing same key
