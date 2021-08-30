@@ -9,14 +9,14 @@ program
   .option('--watch', 'watch files')
   .parse(process.argv)
 
-const { patterns, ...settings } = require(path.resolve(program.config))
+const settings = require(path.resolve(program.config))
 
-if (!Array.isArray(patterns)) {
+if (!Array.isArray(settings.patterns)) {
   console.log('"patterns" option is missing:')
   return program.help()
 }
 
-const { exportJson, watch } = useAssetsLoader(patterns, settings, { projectRoot: process.env.INIT_CWD })
+const { exportJson, watch } = useAssetsLoader(settings, { projectRoot: process.env.INIT_CWD })
 
 exportJson()
 console.log('PhaserAssets: Initialized')

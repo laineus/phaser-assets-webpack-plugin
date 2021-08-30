@@ -28,13 +28,26 @@ const PhaserAssetsWebpackPlugin = require('phaser-assets-webpack-plugin')
     ...
   },
   plugins: [
-    new PhaserAssetsWebpackPlugin([
-      { type: 'image', dir: '/img', rule: /^\w+\.png$/ },
-      { type: 'audio', dir: '/audio', rule: /^\w+\.(m4a|ogg)$/ }
-    ], { documentRoot: './public', output: './src/assets.json' })
+    new PhaserAssetsWebpackPlugin({
+      patterns: [
+        { type: 'image', dir: '/img', rule: /^\w+\.png$/ },
+        { type: 'audio', dir: '/audio', rule: /^\w+\.(m4a|ogg)$/ }
+      ],
+      documentRoot: './public',
+      output: './src/assets.json'
+    })
   ]
 }
 ```
+
+Settings:
+
+|Key|Default|What is|
+|---|---|---|
+|patterns|Required|An Array of assets settings|
+|documentRoot|`'public'`|The path to the document root directory.|
+|output|`'assets.json'`|The path to the json file to output.|
+|spriteSheetSettingsFileName|`'settings.json'`|The name of settings file for spritesheet.|
 
 Patterns:
 
@@ -46,15 +59,25 @@ Patterns:
 |rule|Yes|Name pattern of files to be assets.|
 |callback|No|Callback function after loaded. Given arg that Array of the loaded data.|
 
-Options:
+## CLI
 
-|Key|Default|What is|
-|---|---|---|
-|documentRoot|`'public'`|The path to the document root directory.|
-|output|`'assets.json'`|The path to the json file to output.|
-|spriteSheetSettingsFileName|`'settings.json'`|The name of settings file for spritesheet.|
+```js
+// config file
+module.exports = {
+  patterns: [
+    { type: 'image', dir: '/img', rule: /^\w+\.png$/ },
+    { type: 'audio', dir: '/audio', rule: /^\w+\.(m4a|ogg)$/ }
+  ],
+  documentRoot: './public',
+  output: './src/assets.json'
+}
+```
 
-## Use it in Phaser3
+```
+$ phaser-assets --config <path to config file> --watch
+```
+
+## Use the exported json in Phaser3
 
 An example of the exported json.
 
