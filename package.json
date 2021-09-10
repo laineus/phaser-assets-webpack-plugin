@@ -1,15 +1,12 @@
 {
   "name": "phaser-assets-webpack-plugin",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Load assets automatically for Phaser3",
   "main": "index.js",
-  "bin": {
-    "phaser-assets": "bin/index"
-  },
   "repository": "https://github.com/laineus/phaser-assets-webpack-plugin",
   "author": "Laineus",
   "license": "MIT",
   "dependencies": {
-    "image-size": "^0.9.1"
+    "phaser-assets-loader": "^1.0.0"
   }
 }

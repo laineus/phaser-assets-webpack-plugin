@@ -1,4 +1,4 @@
-const useAssetsLoader = require('./lib/useAssetsLoader.js')
+const phaserAssetsLoader = require('phaser-assets-loader')
 
 module.exports = class {
   constructor (settings, ...args) {
@@ -9,7 +9,7 @@ module.exports = class {
   }
   apply (compiler) {
     this.projectRoot = compiler.context
-    const { exportJson, watch } = useAssetsLoader(this.settings, { projectRoot: compiler.context })
+    const { exportJson, watch } = phaserAssetsLoader(this.settings, { projectRoot: compiler.context })
     compiler.hooks.afterEnvironment.tap('AssetsPlugin', () => {
       exportJson()
       console.log('PhaserAssetsWebpackPlugin: Initialized')
